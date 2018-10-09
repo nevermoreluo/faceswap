@@ -76,7 +76,7 @@ class Model():
     
 #    ENCODER_DIM = 1536 # dense layer size
     ENCODER_DIM = 1024        
-    IMAGE_SHAPE = 64, 64 # image shape
+    IMAGE_SHAPE = 80, 80 # image shape
     
     assert [n for n in IMAGE_SHAPE if n>=16]
     
@@ -263,29 +263,29 @@ class Model():
         x = self.conv(512)(x)
         x = self.conv(1024)(x)
         x = Dense(self.ENCODER_DIM)(Flatten()(x))
-        x = Dense(4 * 4 * 1024)(x)
-        x = Reshape((4, 4, 1024))(x)
+        x = Dense(5 * 5 * 1024)(x)
+        x = Reshape((5, 5, 1024))(x)
         x = self.upscale_sub(512)(x)
         return KerasModel(input_, x, **kwargs)   
     
     def Decoder_superres_A(self):       
-        input_ = Input(shape=(8, 8, 512))
+        input_ = Input(shape=(10, 10, 512))
+        complexity = 256
         x = input_
-        x = self.upscale_sub(256)(x)
-        x = self.upscale_sub(128)(x)
-        x = self.upscale_sub(64)(x)
+        x = self.upscale_sub(complexity)(x)        
+        x = self.upscale_sub(complexity // 2)(x)        
+        x = self.upscale_sub(complexity // 4)(x)
         x = Conv2D(3, kernel_size=5, padding='same', activation='sigmoid')(x)
         return KerasModel(input_, x)   
 
     def Decoder_superres_B(self):       
-        input_ = Input(shape=(8, 8, 512))
+        input_ = Input(shape=(10, 10, 512))
+        complexity = 384
         x = input_
-        x = self.upscale_sub(256)(x)
-        x = self.res_block(x, 256)
-        x = self.upscale_sub(128)(x)
-        x = self.res_block(x, 128)
-        x = self.upscale_sub(64)(x)
-        x = self.res_block(x, 64)
+        x = self.upscale_sub(complexity)(x)        
+        x = self.upscale_sub(complexity // 2)(x)        
+        x = self.upscale_sub(complexity // 4)(x)
+        
         x = Conv2D(3, kernel_size=5, padding='same', activation='sigmoid')(x)
         return KerasModel(input_, x)      
     
@@ -311,22 +311,23 @@ class Model():
 #         return KerasModel(input_, x)
     
     def Encoder_sr(self):
-        input_ = Input(shape=(64, 64, 3))
+        input_ = Input(shape=(80, 80, 3))
         x = input_
-        x = self.conv(512)(x)
+        x = self.conv(384)(x)
         
         x = Dense(160)(Flatten()(x))        
-        x = Dense(64 * 64 * 48)(x)        
-        x = Reshape((64, 64, 48))(x)
+        x = Dense(80 * 80 * 32)(x)        
+        x = Reshape((80, 80, 32))(x)
         return KerasModel(input_, x)
 
     def Decoder_sr(self):
-        input_ = Input(shape=(64, 64, 48))
+        input_ = Input(shape=(80, 80, 32))
+        complexity = 512
         x = input_
-        x = self.upscale(512)(x)
-        x = self.res_block(x, 512)
-        x = self.upscale(256)(x)
-        x = self.res_block(x, 256)
+        x = self.upscale(complexity)(x)
+        x = self.res_block(x, complexity)
+#         x = self.res_block(x, complexity)
+#         x = self.res_block(x, complexity)
         #x = self.res_block(x, 384)
 #        x = self.upscale(128)(x)
         x = Conv2D(3, kernel_size=5, padding='same', activation='sigmoid')(x)

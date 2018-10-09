@@ -74,8 +74,8 @@ class Trainer():
 
         #K.clear_session()
         
-        in_size = 64
-        out_size = 128
+        in_size = 80
+        out_size = 160
         
         when = self._clock()
         _, warped_A, target_A, fnA = next(self.images_A)
@@ -95,9 +95,9 @@ class Trainer():
         #hr_setB = [self.random_warp(self.load_image(fn), 160, scale = 5, zoom = 4) for fn in fnB]
         #hr_setB = self.resize(hr_setB, out_size)
         #sr_training_target = self.resize(target_B, 256, cv2.INTER_AREA)
-        sr_training_target=target_B        
+        
                                
-        loss_C = self.model.autoencoder_SR.train_on_batch(res_BB, sr_training_target)        
+        loss_C = self.model.autoencoder_SR.train_on_batch(res_BB, self.resize(target_B, out_size, cv2.INTER_AREA) )        
         
         self.model.epoch_no += 1        
                  
@@ -118,14 +118,17 @@ class Trainer():
             
 
     def show_sample(self, test_A, test_B):
-        im_size = 256                
-        orig_out_size = 64
+        im_size = 160                
+        orig_out_size = 80
         
         res_AA = self.model.autoencoder_A.predict(self.resize( test_A, orig_out_size))
-        res_BB = self.model.autoencoder_B.predict(self.resize( test_B, orig_out_size ))
-        
+        res_BB = self.model.autoencoder_B.predict(self.resize( test_B, orig_out_size ))        
         res_BA = self.model.autoencoder_B.predict(self.resize( test_A, orig_out_size))
         res_sr = self.model.autoencoder_SR.predict(res_BA) 
+#         print(res_AA.shape)
+#         print(res_BB.shape)
+#         print(res_BA.shape)
+#         print(res_sr.shape)
 
         figure_A = numpy.stack([
             self.resize(test_A, im_size, cv2.INTER_AREA),
