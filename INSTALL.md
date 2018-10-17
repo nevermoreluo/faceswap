@@ -33,8 +33,9 @@ The developers are also not responsible for any damage you might cause to your o
 
 # Installation Instructions
 ## Installing dependencies
-- Python >= 3.2
+- Python >= 3.2 >= 3.6
   - apt/yum install python3 (Linux)
+  - [Anaconda](https://www.anaconda.com/download/) (Windows - Recommended)
   - [Installer](https://www.python.org/downloads/) (Windows)
   - [brew](https://brew.sh/) install python3 (macOS)
 
